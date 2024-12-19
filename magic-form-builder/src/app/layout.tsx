@@ -16,6 +16,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <div className="stars">
+          <div className="star"></div>
+          <div className="star"></div>
+          <div className="star"></div>
+          <div className="star"></div>
+          <div className="star"></div>
+        </div>
         <div className="background-animation">
           <div className="gradient-ball gradient-ball-1"></div>
           <div className="gradient-ball gradient-ball-2"></div>
