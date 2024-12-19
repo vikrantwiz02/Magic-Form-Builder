@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { useDrag, useDrop } from 'react-dnd'
+import { useDrag, useDrop, DropTargetMonitor } from 'react-dnd'
 import { FormField, FieldType } from '../types/form'
 
 interface FieldListProps {
@@ -38,14 +38,14 @@ interface DraggableFieldProps {
 function DraggableField({ index, field, updateField, removeField, moveField }: DraggableFieldProps) {
   const ref = useRef<HTMLDivElement>(null)
 
-  const [{ handlerId }, drop] = useDrop({
+  const [{ handlerId }, drop] = useDrop<{ index: number }, void, { handlerId: string | symbol | null }>({
     accept: 'field',
     collect(monitor) {
       return {
         handlerId: monitor.getHandlerId(),
       }
     },
-    hover(item: { index: number }, monitor) {
+    hover(item: { index: number }, monitor: DropTargetMonitor) {
       if (!ref.current) {
         return
       }
@@ -74,7 +74,7 @@ function DraggableField({ index, field, updateField, removeField, moveField }: D
     },
   })
 
-  const [{ isDragging }, drag] = useDrag({
+  const [{ isDragging }, drag] = useDrag<{ index: number }, void, { isDragging: boolean }>({
     type: 'field',
     item: () => {
       return { index }
