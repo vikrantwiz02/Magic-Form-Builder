@@ -1,14 +1,28 @@
 import { useState, useEffect } from 'react'
-import { FormField, FieldType, Condition } from '../types/form'
+import { FormField, FieldType, Condition, FormSettings } from '../types/form'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { format } from "date-fns"
+import { CalendarIcon } from 'lucide-react'
 
 interface PreviewProps {
   fields: FormField[]
   conditions: Condition[]
+  formSettings: FormSettings
 }
 
-export default function Preview({ fields, conditions }: PreviewProps) {
+export default function Preview({ fields, conditions, formSettings }: PreviewProps) {
   const [formData, setFormData] = useState<Record<string, any>>({})
   const [visibleFields, setVisibleFields] = useState<string[]>(fields.map((f) => f.id))
+  const [submitted, setSubmitted] = useState(false)
 
   useEffect(() => {
     updateVisibleFields()
@@ -57,26 +71,49 @@ export default function Preview({ fields, conditions }: PreviewProps) {
     setFormData({ ...formData, [fieldId]: value })
   }
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log('Form submitted:', formData)
+    setSubmitted(true)
+  }
+
+  const themeClass = formSettings.theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
+
+  if (submitted) {
+    return (
+      <Card className={themeClass}>
+        <CardContent className="pt-6">
+          <h2 className="text-2xl font-bold mb-4">{formSettings.successMessage}</h2>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
-    <div className="max-w-2xl mx-auto bg-white bg-opacity-10 p-6 rounded-lg">
-      <h2 className="text-2xl font-bold mb-4 text-white">Form Preview</h2>
-      <form className="space-y-6">
-        {fields.map((field) => (
-          visibleFields.includes(field.id) && (
-            <div key={field.id} className="space-y-2">
-              <label className="block font-medium text-white">
-                {field.label}
-                {field.required && <span className="text-red-500 ml-1">*</span>}
-              </label>
-              {renderField(field, formData[field.id], (value) => handleInputChange(field.id, value))}
-            </div>
-          )
-        ))}
-        <button type="submit" className="bg-gradient-to-r from-cyan-400 to-pink-600 text-white px-4 py-2 rounded hover:from-cyan-500 hover:to-pink-700 transition-colors">
-          Submit
-        </button>
-      </form>
-    </div>
+    <Card className={themeClass}>
+      <CardHeader>
+        <CardTitle>{formSettings.title}</CardTitle>
+        {formSettings.description && <CardDescription>{formSettings.description}</CardDescription>}
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {fields.map((field) => (
+            visibleFields.includes(field.id) && (
+              <div key={field.id} className="space-y-2">
+                <Label htmlFor={field.id}>
+                  {field.label}
+                  {field.required && <span className="text-red-500 ml-1">*</span>}
+                </Label>
+                {renderField(field, formData[field.id], (value) => handleInputChange(field.id, value))}
+              </div>
+            )
+          ))}
+          <Button type="submit">
+            {formSettings.submitButtonText}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -84,9 +121,9 @@ function renderField(field: FormField, value: any, onChange: (value: any) => voi
   switch (field.type) {
     case FieldType.Text:
       return (
-        <input
+        <Input
+          id={field.id}
           type="text"
-          className="w-full border p-2 rounded bg-gray-800 text-white border-gray-700"
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           required={field.required}
@@ -94,63 +131,56 @@ function renderField(field: FormField, value: any, onChange: (value: any) => voi
       )
     case FieldType.TextArea:
       return (
-        <textarea
-          className="w-full border p-2 rounded bg-gray-800 text-white border-gray-700"
+        <Textarea
+          id={field.id}
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           required={field.required}
-        ></textarea>
+        />
       )
     case FieldType.Checkbox:
       return (
-        <input
-          type="checkbox"
-          className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-offset-0 focus:ring-indigo-200 focus:ring-opacity-50"
+        <Checkbox
+          id={field.id}
           checked={value || false}
-          onChange={(e) => onChange(e.target.checked)}
+          onCheckedChange={(checked) => onChange(checked)}
           required={field.required}
         />
       )
     case FieldType.Radio:
       return (
-        <div className="space-y-2">
-          {field.options?.map((option, optionIndex) => (
-            <label key={optionIndex} className="flex items-center text-white">
-              <input
-                type="radio"
-                className="mr-2"
-                name={`field-${field.id}`}
-                value={option}
-                checked={value === option}
-                onChange={(e) => onChange(e.target.value)}
-                required={field.required}
-              />
-              <span>{option}</span>
-            </label>
+        <RadioGroup
+          value={value}
+          onValueChange={onChange}
+        >
+          {field.options?.map((option, index) => (
+            <div key={index} className="flex items-center space-x-2">
+              <RadioGroupItem value={option} id={`${field.id}-${index}`} />
+              <Label htmlFor={`${field.id}-${index}`}>{option}</Label>
+            </div>
           ))}
-        </div>
+        </RadioGroup>
       )
     case FieldType.Select:
       return (
-        <select
-          className="w-full border p-2 rounded bg-gray-800 text-white border-gray-700"
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-          required={field.required}
-        >
-          <option value="">Select an option</option>
-          {field.options?.map((option, optionIndex) => (
-            <option key={optionIndex} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
+        <Select value={value} onValueChange={onChange}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select an option" />
+          </SelectTrigger>
+          <SelectContent>
+            {field.options?.map((option, index) => (
+              <SelectItem key={index} value={option}>
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       )
     case FieldType.File:
       return (
-        <input
+        <Input
+          id={field.id}
           type="file"
-          className="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
           onChange={(e) => onChange(e.target.files?.[0])}
           required={field.required}
         />
@@ -171,6 +201,40 @@ function renderField(field: FormField, value: any, onChange: (value: any) => voi
             </button>
           ))}
         </div>
+      )
+    case FieldType.Integer:
+      return (
+        <Input
+          id={field.id}
+          type="number"
+          value={value || ''}
+          onChange={(e) => onChange(parseInt(e.target.value))}
+          required={field.required}
+          min={field.min}
+          max={field.max}
+        />
+      )
+    case FieldType.Date:
+      return (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant={"outline"}
+              className={`w-full justify-start text-left font-normal ${!value && "text-muted-foreground"}`}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {value ? format(value, "PPP") : <span>Pick a date</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0">
+            <Calendar
+              mode="single"
+              selected={value}
+              onSelect={onChange}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
       )
     default:
       return null

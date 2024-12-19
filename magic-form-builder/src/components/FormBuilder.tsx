@@ -3,107 +3,103 @@
 import { useState } from 'react'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
-import FieldEditor from './FileEditor'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import FieldEditor from './FieldEditor'
 import FieldList from './FieldList'
 import Preview from './Preview'
 import CodeGenerator from './CodeGenerator'
 import ConditionalLogic from './ConditionalLogic'
-import { FormField, Condition } from '../types/form'
+import FormSettings from './FormSettings'
+import { FormField, Condition, FormSettings as FormSettingsType } from '../types/form'
 
 export default function FormBuilder() {
   const [fields, setFields] = useState<FormField[]>([])
-  const [activeTab, setActiveTab] = useState<'editor' | 'preview' | 'code' | 'logic'>('editor')
   const [conditions, setConditions] = useState<Condition[]>([])
+  const [formSettings, setFormSettings] = useState<FormSettingsType>({
+    title: 'Untitled Form',
+    description: '',
+    submitButtonText: 'Submit',
+    successMessage: 'Thank you for your submission!',
+    theme: 'light',
+  })
 
   const addField = (field: FormField) => {
-    setFields([...fields, field])
+    setFields((prevFields) => [...prevFields, field])
   }
 
   const updateField = (index: number, field: FormField) => {
-    const newFields = [...fields]
-    newFields[index] = field
-    setFields(newFields)
+    setFields((prevFields) => {
+      const newFields = [...prevFields]
+      newFields[index] = field
+      return newFields
+    })
   }
 
   const removeField = (index: number) => {
-    const newFields = fields.filter((_, i) => i !== index)
-    setFields(newFields)
+    setFields((prevFields) => prevFields.filter((_, i) => i !== index))
   }
 
   const moveField = (dragIndex: number, hoverIndex: number) => {
-    const newFields = [...fields]
-    const draggedField = newFields[dragIndex]
-    newFields.splice(dragIndex, 1)
-    newFields.splice(hoverIndex, 0, draggedField)
-    setFields(newFields)
+    setFields((prevFields) => {
+      const newFields = [...prevFields]
+      const [draggedField] = newFields.splice(dragIndex, 1)
+      newFields.splice(hoverIndex, 0, draggedField)
+      return newFields
+    })
   }
 
   const addCondition = (condition: Condition) => {
-    setConditions([...conditions, condition])
+    setConditions((prevConditions) => [...prevConditions, condition])
   }
 
   const removeCondition = (index: number) => {
-    const newConditions = conditions.filter((_, i) => i !== index)
-    setConditions(newConditions)
+    setConditions((prevConditions) => prevConditions.filter((_, i) => i !== index))
+  }
+
+  const updateFormSettings = (newSettings: Partial<FormSettingsType>) => {
+    setFormSettings((prevSettings) => ({ ...prevSettings, ...newSettings }))
   }
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-lg overflow-hidden border border-gray-200 border-opacity-20">
-        <div className="flex border-b border-gray-200 border-opacity-20">
-          <TabButton active={activeTab === 'editor'} onClick={() => setActiveTab('editor')}>
-            Editor
-          </TabButton>
-          <TabButton active={activeTab === 'preview'} onClick={() => setActiveTab('preview')}>
-            Preview
-          </TabButton>
-          <TabButton active={activeTab === 'logic'} onClick={() => setActiveTab('logic')}>
-            Conditional Logic
-          </TabButton>
-          <TabButton active={activeTab === 'code'} onClick={() => setActiveTab('code')}>
-            Generate Code
-          </TabButton>
-        </div>
-        <div className="p-6">
-          {activeTab === 'editor' && (
-            <div className="flex flex-col md:flex-row gap-8">
-              <div className="w-full md:w-1/3">
-                <FieldEditor addField={addField} />
-              </div>
-              <div className="w-full md:w-2/3">
-                <FieldList
-                  fields={fields}
-                  updateField={updateField}
-                  removeField={removeField}
-                  moveField={moveField}
-                />
-              </div>
-            </div>
-          )}
-          {activeTab === 'preview' && <Preview fields={fields} conditions={conditions} />}
-          {activeTab === 'logic' && (
-            <ConditionalLogic
+      <Tabs defaultValue="editor" className="w-full">
+        <TabsList className="grid w-full grid-cols-5 mb-8">
+          <TabsTrigger value="editor">Editor</TabsTrigger>
+          <TabsTrigger value="preview">Preview</TabsTrigger>
+          <TabsTrigger value="logic">Logic</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
+          <TabsTrigger value="code">Code</TabsTrigger>
+        </TabsList>
+        <TabsContent value="editor">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <FieldEditor addField={addField} />
+            <FieldList
               fields={fields}
-              conditions={conditions}
-              addCondition={addCondition}
-              removeCondition={removeCondition}
+              updateField={updateField}
+              removeField={removeField}
+              moveField={moveField}
             />
-          )}
-          {activeTab === 'code' && <CodeGenerator fields={fields} conditions={conditions} />}
-        </div>
-      </div>
+          </div>
+        </TabsContent>
+        <TabsContent value="preview">
+          <Preview fields={fields} conditions={conditions} formSettings={formSettings} />
+        </TabsContent>
+        <TabsContent value="logic">
+          <ConditionalLogic
+            fields={fields}
+            conditions={conditions}
+            addCondition={addCondition}
+            removeCondition={removeCondition}
+          />
+        </TabsContent>
+        <TabsContent value="settings">
+          <FormSettings settings={formSettings} updateSettings={updateFormSettings} />
+        </TabsContent>
+        <TabsContent value="code">
+          <CodeGenerator fields={fields} conditions={conditions} formSettings={formSettings} />
+        </TabsContent>
+      </Tabs>
     </DndProvider>
-  )
-}
-
-function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      className={`tab-button ${active ? 'active' : ''}`}
-      onClick={onClick}
-    >
-      {children}
-    </button>
   )
 }
 

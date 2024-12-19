@@ -1,11 +1,11 @@
 import './globals.css'
-import { Inter } from 'next/font/google'
+import { Poppins } from 'next/font/google'
 
-const inter = Inter({ subsets: ['latin'] })
+const poppins = Poppins({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700'] })
 
 export const metadata = {
-  title: 'Advanced Form Builder',
-  description: 'Create dynamic forms with ease',
+  title: 'Magic Form Builder',
+  description: 'Create professional-grade forms with ease',
 }
 
 export default function RootLayout({
@@ -15,27 +15,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <div className="stars">
-          <div className="star"></div>
-          <div className="star"></div>
-          <div className="star"></div>
-          <div className="star"></div>
-          <div className="star"></div>
-        </div>
-        <div className="background-animation">
-          <div className="gradient-ball gradient-ball-1"></div>
-          <div className="gradient-ball gradient-ball-2"></div>
-          <div className="gradient-ball gradient-ball-3"></div>
-        </div>
-        <div className="geometric-shapes">
-          <div className="shape shape-1"></div>
-          <div className="shape shape-2"></div>
-          <div className="shape shape-3"></div>
-        </div>
-        <main className="main-content">
+      <body className={poppins.className}>
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50">
           {children}
-        </main>
+        </div>
       </body>
     </html>
   )

@@ -6,15 +6,19 @@ export enum FieldType {
     Select = 'Select',
     File = 'File',
     Rating = 'Rating',
+    Integer = 'Integer',
+    Date = 'Date'
   }
   
   export interface FormField {
-    id: string
-    type: FieldType
-    label: string
-    required: boolean
-    options?: string[]
-    maxRating?: number
+    id: string;
+    type: FieldType;
+    label: string;
+    required: boolean;
+    options?: string[];
+    maxRating?: number;
+    min?: number;
+    max?: number;
   }
   
   export enum ConditionOperator {
@@ -26,11 +30,19 @@ export enum FieldType {
   }
   
   export interface Condition {
-    fieldId: string
-    operator: ConditionOperator
-    value: string
-    action: 'show' | 'hide'
-    targetFieldId: string
+    fieldId: string;
+    operator: ConditionOperator;
+    value: string;
+    action: 'show' | 'hide';
+    targetFieldId: string;
+  }
+  
+  export interface FormSettings {
+    title: string;
+    description: string;
+    submitButtonText: string;
+    successMessage: string;
+    theme: 'light' | 'dark';
   }
   
   

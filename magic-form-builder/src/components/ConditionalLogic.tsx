@@ -1,5 +1,10 @@
 import { useState } from 'react'
 import { FormField, Condition, ConditionOperator } from '../types/form'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface ConditionalLogicProps {
   fields: FormField[]
@@ -37,81 +42,112 @@ export default function ConditionalLogic({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold mb-4 text-white">Conditional Logic</h2>
-      <div className="space-y-2 bg-white bg-opacity-10 p-4 rounded-lg">
-        <select
-          className="w-full border p-2 rounded bg-gray-800 text-white border-gray-700"
-          value={newCondition.fieldId}
-          onChange={(e) => setNewCondition({ ...newCondition, fieldId: e.target.value })}
-        >
-          <option value="">Select Field</option>
-          {fields.map((field) => (
-            <option key={field.id} value={field.id}>
-              {field.label}
-            </option>
-          ))}
-        </select>
-        <select
-          className="w-full border p-2 rounded bg-gray-800 text-white border-gray-700"
-          value={newCondition.operator}
-          onChange={(e) =>
-            setNewCondition({ ...newCondition, operator: e.target.value as ConditionOperator })
-          }
-        >
-          <option value={ConditionOperator.Equals}>Equals</option>
-          <option value={ConditionOperator.NotEquals}>Not Equals</option>
-          <option value={ConditionOperator.Contains}>Contains</option>
-          <option value={ConditionOperator.GreaterThan}>Greater Than</option>
-          <option value={ConditionOperator.LessThan}>Less Than</option>
-        </select>
-        <input
-          type="text"
-          className="w-full border p-2 rounded bg-gray-800 text-white border-gray-700"
-          placeholder="Value"
-          value={newCondition.value}
-          onChange={(e) => setNewCondition({ ...newCondition, value: e.target.value })}
-        />
-        <select
-          className="w-full border p-2 rounded bg-gray-800 text-white border-gray-700"
-          value={newCondition.action}
-          onChange={(e) => setNewCondition({ ...newCondition, action: e.target.value as 'show' | 'hide' })}
-        >
-          <option value="show">Show</option>
-          <option value="hide">Hide</option>
-        </select>
-        <select
-          className="w-full border p-2 rounded bg-gray-800 text-white border-gray-700"
-          value={newCondition.targetFieldId}
-          onChange={(e) => setNewCondition({ ...newCondition, targetFieldId: e.target.value })}
-        >
-          <option value="">Select Target Field</option>
-          {fields.map((field) => (
-            <option key={field.id} value={field.id}>
-              {field.label}
-            </option>
-          ))}
-        </select>
-        <button
-          className="w-full bg-gradient-to-r from-cyan-400 to-pink-600 text-white px-4 py-2 rounded hover:from-cyan-500 hover:to-pink-700 transition-colors"
-          onClick={handleAddCondition}
-        >
-          Add Condition
-        </button>
-      </div>
+      <h2 className="text-2xl font-bold mb-4 text-gray-800">Conditional Logic</h2>
+      <Card>
+        <CardHeader>
+          <CardTitle>Add New Condition</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="fieldId">If Field</Label>
+              <Select
+                value={newCondition.fieldId}
+                onValueChange={(value) => setNewCondition({ ...newCondition, fieldId: value })}
+              >
+                <SelectTrigger id="fieldId">
+                  <SelectValue placeholder="Select Field" />
+                </SelectTrigger>
+                <SelectContent>
+                  {fields.map((field) => (
+                    <SelectItem key={field.id} value={field.id}>
+                      {field.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="operator">Operator</Label>
+              <Select
+                value={newCondition.operator}
+                onValueChange={(value) =>
+                  setNewCondition({ ...newCondition, operator: value as ConditionOperator })
+                }
+              >
+                <SelectTrigger id="operator">
+                  <SelectValue placeholder="Select Operator" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(ConditionOperator).map((op) => (
+                    <SelectItem key={op} value={op}>
+                      {op}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="value">Value</Label>
+              <Input
+                id="value"
+                value={newCondition.value}
+                onChange={(e) => setNewCondition({ ...newCondition, value: e.target.value })}
+                placeholder="Enter value"
+              />
+            </div>
+            <div>
+              <Label htmlFor="action">Action</Label>
+              <Select
+                value={newCondition.action}
+                onValueChange={(value) => setNewCondition({ ...newCondition, action: value as 'show' | 'hide' })}
+              >
+                <SelectTrigger id="action">
+                  <SelectValue placeholder="Select Action" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="show">Show</SelectItem>
+                  <SelectItem value="hide">Hide</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="targetFieldId">Target Field</Label>
+              <Select
+                value={newCondition.targetFieldId}
+                onValueChange={(value) => setNewCondition({ ...newCondition, targetFieldId: value })}
+              >
+                <SelectTrigger id="targetFieldId">
+                  <SelectValue placeholder="Select Target Field" />
+                </SelectTrigger>
+                <SelectContent>
+                  {fields.map((field) => (
+                    <SelectItem key={field.id} value={field.id}>
+                      {field.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={handleAddCondition} className="w-full">
+              Add Condition
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
       <div className="space-y-2">
         {conditions.map((condition, index) => (
-          <div key={index} className="flex items-center justify-between bg-white bg-opacity-10 p-2 rounded-lg text-white">
-            <span>
-              {fields.find((f) => f.id === condition.fieldId)?.label} {condition.operator} {condition.value} {condition.action}{' '}
-              {fields.find((f) => f.id === condition.targetFieldId)?.label}
-            </span>
-            <button
-              className="text-red-400 hover:text-red-600 transition-colors"
-              onClick={() => removeCondition(index)}
-            >
-              Remove
-            </button>
-          </div>
+          <Card key={index}>
+            <CardContent className="flex items-center justify-between py-4">
+              <span className="text-sm">
+                If {fields.find((f) => f.id === condition.fieldId)?.label} {condition.operator} {condition.value} {condition.action}{' '}
+                {fields.find((f) => f.id === condition.targetFieldId)?.label}
+              </span>
+              <Button variant="destructive" size="sm" onClick={() => removeCondition(index)}>
+                Remove
+              </Button>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>
