@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { FormField, FieldType, Condition, FormSettings } from '../types/form'
 import { Button } from "@/components/ui/button"

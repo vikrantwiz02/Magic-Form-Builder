@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from 'react'
 import { FormField, Condition, ConditionOperator } from '../types/form'
 import { Button } from "@/components/ui/button"

@@ -1,4 +1,6 @@
-import { FormSettings } from '../types/form'
+'use client'
+
+import { FormSettings as FormSettingsType } from '../types/form'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -6,8 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface FormSettingsProps {
-  settings: FormSettings
-  updateSettings: (newSettings: Partial<FormSettings>) => void
+  settings: FormSettingsType
+  updateSettings: (newSettings: Partial<FormSettingsType>) => void
 }
 
 export default function FormSettings({ settings, updateSettings }: FormSettingsProps) {

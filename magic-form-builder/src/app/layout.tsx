@@ -1,12 +1,10 @@
 import './globals.css'
 import { Poppins } from 'next/font/google'
+import { metadata } from './metadata'
 
 const poppins = Poppins({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700'] })
 
-export const metadata = {
-  title: 'Magic Form Builder',
-  description: 'Create professional-grade forms with ease',
-}
+export { metadata }
 
 export default function RootLayout({
   children,
