@@ -1,11 +1,10 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 
 export const metadata: Metadata = {
   title: 'Magic Form Builder',
   description: 'Create professional-grade forms with ease using this intuitive Magic Form Builder.',
   keywords: ['form builder', 'custom forms', 'survey creator', 'questionnaire maker'],
   authors: [{ name: 'Form Builder Developer' }],
-  viewport: 'width=device-width, initial-scale=1',
   openGraph: {
     title: 'Magic Form Builder',
     description: 'Create professional-grade forms with ease using this intuitive Magic Form Builder.',
@@ -18,7 +17,7 @@ export const metadata: Metadata = {
         alt: 'Magic Form Builder Preview',
       },
     ],
-    locale: 'en_IN',
+    locale: 'en_US',
     type: 'website',
   },
   twitter: {
@@ -27,5 +26,10 @@ export const metadata: Metadata = {
     description: 'Create professional-grade forms with ease using this intuitive Magic Form Builder.',
     images: ['https://via.placeholder.com/1200x600.png?text=Magic+Form+Builder'],
   },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 }
 

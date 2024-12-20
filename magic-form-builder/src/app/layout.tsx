@@ -1,10 +1,10 @@
 import './globals.css'
 import { Poppins } from 'next/font/google'
-import { metadata } from './metadata'
+import { metadata, viewport } from './metadata'
 
 const poppins = Poppins({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700'] })
 
-export { metadata }
+export { metadata, viewport }
 
 export default function RootLayout({
   children,
