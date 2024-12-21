@@ -19,8 +19,6 @@ export default function CodeGenerator({ fields, conditions, formSettings }: Code
     switch (language) {
       case 'react-tailwind':
         return generateReactTailwindCode(fields, conditions, formSettings)
-      case 'typescript-tailwind':
-        return generateTypeScriptTailwindCode(fields, conditions, formSettings)
       case 'html-css':
         return generateHtmlCssCode(fields, conditions, formSettings)
       default:
@@ -51,7 +49,6 @@ export default function CodeGenerator({ fields, conditions, formSettings }: Code
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="react-tailwind">React + Tailwind</SelectItem>
-                <SelectItem value="typescript-tailwind">TypeScript + Tailwind</SelectItem>
                 <SelectItem value="html-css">HTML + CSS</SelectItem>
               </SelectContent>
             </Select>
@@ -142,81 +139,7 @@ export default function GeneratedForm() {
     </form>
   );
 }
-  `
-}
-
-function generateTypeScriptTailwindCode(fields: FormField[], conditions: Condition[], formSettings: FormSettings): string {
-  return `
-import React, { useState, useEffect } from 'react';
-
-interface FormData {
-  ${fields.map(field => `${field.id}: ${getTypeScriptType(field.type)};`).join('\n  ')}
-}
-
-export default function GeneratedForm() {
-  const [formData, setFormData] = useState<FormData>({});
-  const [visibleFields, setVisibleFields] = useState<string[]>(${JSON.stringify(fields.map(f => f.id))});
-  const [submitted, setSubmitted] = useState<boolean>(false);
-
-  useEffect(() => {
-    updateVisibleFields();
-  }, [formData]);
-
-  const updateVisibleFields = () => {
-    const newVisibleFields = [...visibleFields];
-    ${conditions.map(condition => `
-    if (formData['${condition.fieldId}'] ${getOperatorString(condition.operator)} ${JSON.stringify(condition.value)}) {
-      const index = newVisibleFields.indexOf('${condition.targetFieldId}');
-      if ('${condition.action}' === 'show' && index === -1) {
-        newVisibleFields.push('${condition.targetFieldId}');
-      } else if ('${condition.action}' === 'hide' && index > -1) {
-        newVisibleFields.splice(index, 1);
-      }
-    }
-    `).join('\n')}
-    setVisibleFields(newVisibleFields);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    setFormData(prevData => ({
-      ...prevData,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    }));
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log(formData);
-    setSubmitted(true);
-  };
-
-  if (submitted) {
-    return <div className="text-center">${formSettings.successMessage}</div>;
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-2xl font-bold mb-4">${formSettings.title}</h2>
-      ${formSettings.description ? `<p className="mb-6">${formSettings.description}</p>` : ''}
-      ${fields.map(field => `
-      {visibleFields.includes('${field.id}') && (
-        <div key="${field.id}" className="space-y-2">
-          <label htmlFor="${field.id}" className="block font-medium">
-            ${field.label}
-            ${field.required ? `<span className="text-red-500 ml-1">*</span>` : ''}
-          </label>
-          ${renderReactField(field)}
-        </div>
-      )}
-      `).join('\n')}
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
-        ${formSettings.submitButtonText}
-      </button>
-    </form>
-  );
-}
-  `
+`
 }
 
 function generateHtmlCssCode(fields: FormField[], conditions: Condition[], formSettings: FormSettings): string {
@@ -250,7 +173,7 @@ function generateHtmlCssCode(fields: FormField[], conditions: Condition[], formS
       display: block;
       margin-bottom: 5px;
     }
-    input[type="text"], input[type="email"], input[type="number"], input[type="date"], textarea, select {
+    input[type="text"], input[type="email"], textarea, select {
       width: 100%;
       padding: 8px;
       border: 1px solid #ddd;
@@ -323,7 +246,7 @@ function generateHtmlCssCode(fields: FormField[], conditions: Condition[], formS
   </script>
 </body>
 </html>
-  `
+`
 }
 
 function renderReactField(field: FormField): string {
@@ -352,36 +275,6 @@ function renderReactField(field: FormField): string {
           ${field.options?.map((option, index) => `<option key="${index}" value="${option}">${option}</option>`).join('\n')}
         </select>
       `
-    case FieldType.File:
-      return `<input type="file" id="${field.id}" name="${field.id}" onChange={handleInputChange} required={${field.required}} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />`
-    case FieldType.Rating:
-      return `
-        <div className="flex items-center mt-1">
-          {[...Array(${field.maxRating || 5})].map((_, index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => handleInputChange({ target: { name: '${field.id}', value: index + 1 } })}
-              className={\`text-2xl \${index < (formData['${field.id}'] || 0) ? 'text-yellow-400' : 'text-gray-300'}\`}
-            >
-              ★
-            </button>
-          ))}
-        </div>
-      `
-    case FieldType.Integer:
-      return `<input type="number" id="${field.id}" name="${field.id}" onChange={handleInputChange} required={${field.required}} min={${field.min}} max={${field.max}} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />`
-    case FieldType.Date:
-      return `
-        <input
-          type="date"
-          id="${field.id}"
-          name="${field.id}"
-          onChange={handleInputChange}
-          required={${field.required}}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-        />
-      `
     default:
       return ''
   }
@@ -409,21 +302,6 @@ function renderHtmlField(field: FormField): string {
           ${field.options?.map(option => `<option value="${option}">${option}</option>`).join('\n')}
         </select>
       `
-    case FieldType.File:
-      return `<input type="file" id="${field.id}" name="${field.id}" ${field.required ? 'required' : ''} />`
-    case FieldType.Rating:
-      return `
-        <div class="rating">
-          ${[...Array(field.maxRating || 5)].map((_, index) => `
-            <input type="radio" id="${field.id}-${index + 1}" name="${field.id}" value="${index + 1}" ${field.required ? 'required' : ''} />
-            <label for="${field.id}-${index + 1}">★</label>
-          `).join('\n')}
-        </div>
-      `
-    case FieldType.Integer:
-      return `<input type="number" id="${field.id}" name="${field.id}" min="${field.min}" max="${field.max}" ${field.required ? 'required' : ''} />`
-    case FieldType.Date:
-      return `<input type="date" id="${field.id}" name="${field.id}" ${field.required ? 'required' : ''} />`
     default:
       return ''
   }
@@ -445,24 +323,3 @@ function getOperatorString(operator: string): string {
       return '==='
   }
 }
-
-function getTypeScriptType(fieldType: FieldType): string {
-  switch (fieldType) {
-    case FieldType.Text:
-    case FieldType.TextArea:
-    case FieldType.Radio:
-    case FieldType.Select:
-    case FieldType.Date:
-      return 'string'
-    case FieldType.Checkbox:
-      return 'boolean'
-    case FieldType.File:
-      return 'File | null'
-    case FieldType.Rating:
-    case FieldType.Integer:
-      return 'number'
-    default:
-      return 'any'
-  }
-}
-

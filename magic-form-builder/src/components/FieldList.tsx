@@ -2,12 +2,8 @@
 
 import { useRef } from 'react'
 import { useDrag, useDrop } from 'react-dnd'
-import { FormField, FieldType } from '../types/form'
+import { FormField } from '../types/form'
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface FieldListProps {
@@ -46,18 +42,19 @@ interface DraggableFieldProps {
 function DraggableField({ index, field, updateField, removeField, moveField }: DraggableFieldProps) {
   const ref = useRef<HTMLDivElement>(null)
 
-  const [{ handlerId }, drop] = useDrop<{ index: number }, void, { handlerId: string | symbol | null }>({
+  const [{ handlerId }, drop] = useDrop({
     accept: 'field',
     collect(monitor) {
       return {
-        handlerId: monitor.getHandlerId(),
+        handlerId: monitor.getHandlerId() as string | null,
       }
     },
-    hover(item: { index: number }, monitor) {
+    hover(item: unknown, monitor) {
       if (!ref.current) {
         return
       }
-      const dragIndex = item.index
+      const dragItem = item as { index: number };
+      const dragIndex = dragItem.index
       const hoverIndex = index
 
       if (dragIndex === hoverIndex) {
@@ -78,7 +75,7 @@ function DraggableField({ index, field, updateField, removeField, moveField }: D
       }
 
       moveField(dragIndex, hoverIndex)
-      item.index = hoverIndex
+      dragItem.index = hoverIndex
     },
   })
 
@@ -96,7 +93,7 @@ function DraggableField({ index, field, updateField, removeField, moveField }: D
   drag(drop(ref))
 
   return (
-    <Card ref={ref} className={`${isDragging ? 'opacity-50' : ''}`} data-handler-id={handlerId}>
+    <Card ref={ref} style={{ opacity }} data-handler-id={handlerId}>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>{field.type}</span>
@@ -106,61 +103,8 @@ function DraggableField({ index, field, updateField, removeField, moveField }: D
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor={`field-label-${field.id}`}>Label</Label>
-            <Input
-              id={`field-label-${field.id}`}
-              value={field.label}
-              onChange={(e) =>
-                updateField(index, { ...field, label: e.target.value })
-              }
-            />
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id={`field-required-${field.id}`}
-              checked={field.required}
-              onCheckedChange={(checked) =>
-                updateField(index, { ...field, required: checked as boolean })
-              }
-            />
-            <Label htmlFor={`field-required-${field.id}`}>Required</Label>
-          </div>
-          {(field.type === FieldType.Radio || field.type === FieldType.Select) && (
-            <div>
-              <Label htmlFor={`field-options-${field.id}`}>Options (comma-separated)</Label>
-              <Input
-                id={`field-options-${field.id}`}
-                value={field.options?.join(', ') || ''}
-                onChange={(e) =>
-                  updateField(index, {
-                    ...field,
-                    options: e.target.value.split(',').map((opt) => opt.trim()),
-                  })
-                }
-              />
-            </div>
-          )}
-          {field.type === FieldType.Rating && (
-            <div>
-              <Label htmlFor={`field-max-rating-${field.id}`}>Max Rating (1-10)</Label>
-              <Input
-                id={`field-max-rating-${field.id}`}
-                type="number"
-                min="1"
-                max="10"
-                value={field.maxRating || ''}
-                onChange={(e) =>
-                  updateField(index, {
-                    ...field,
-                    maxRating: Math.min(10, Math.max(1, parseInt(e.target.value) || 1)),
-                  })
-                }
-              />
-            </div>
-          )}
-        </div>
+        <p>{field.label}</p>
+        <p>{field.required ? 'Required' : 'Optional'}</p>
       </CardContent>
     </Card>
   )

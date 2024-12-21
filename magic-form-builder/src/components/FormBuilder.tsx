@@ -7,9 +7,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import FieldEditor from './FieldEditor'
 import FieldList from './FieldList'
 import Preview from './Preview'
-import CodeGenerator from './CodeGenerator'
 import ConditionalLogic from './ConditionalLogic'
 import FormSettings from './FormSettings'
+import CodeGenerator from './CodeGenerator'
 import { FormField, Condition, FormSettings as FormSettingsType } from '../types/form'
 
 export default function FormBuilder() {
@@ -56,7 +56,7 @@ export default function FormBuilder() {
     setConditions((prevConditions) => prevConditions.filter((_, i) => i !== index))
   }
 
-  const updateFormSettings = (newSettings: Partial<FormSettingsType>) => {
+  const updateSettings = (newSettings: Partial<FormSettingsType>) => {
     setFormSettings((prevSettings) => ({ ...prevSettings, ...newSettings }))
   }
 
@@ -66,7 +66,7 @@ export default function FormBuilder() {
         <TabsList className="grid w-full grid-cols-5 mb-8">
           <TabsTrigger value="editor">Editor</TabsTrigger>
           <TabsTrigger value="preview">Preview</TabsTrigger>
-          <TabsTrigger value="logic">Logic</TabsTrigger>
+          <TabsTrigger value="logic">Conditional Logic</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
           <TabsTrigger value="code">Code</TabsTrigger>
         </TabsList>
@@ -93,7 +93,7 @@ export default function FormBuilder() {
           />
         </TabsContent>
         <TabsContent value="settings">
-          <FormSettings settings={formSettings} updateSettings={updateFormSettings} />
+          <FormSettings settings={formSettings} updateSettings={updateSettings} />
         </TabsContent>
         <TabsContent value="code">
           <CodeGenerator fields={fields} conditions={conditions} formSettings={formSettings} />
