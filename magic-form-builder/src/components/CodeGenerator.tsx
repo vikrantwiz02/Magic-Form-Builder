@@ -173,7 +173,7 @@ function generateHtmlCssCode(fields: FormField[], conditions: Condition[], formS
       display: block;
       margin-bottom: 5px;
     }
-    input[type="text"], input[type="email"], textarea, select {
+    input[type="text"], input[type="email"], input[type="number"], input[type="date"], textarea, select {
       width: 100%;
       padding: 8px;
       border: 1px solid #ddd;
@@ -275,6 +275,36 @@ function renderReactField(field: FormField): string {
           ${field.options?.map((option, index) => `<option key="${index}" value="${option}">${option}</option>`).join('\n')}
         </select>
       `
+    case FieldType.File:
+      return `<input type="file" id="${field.id}" name="${field.id}" onChange={handleInputChange} required={${field.required}} className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />`
+    case FieldType.Rating:
+      return `
+        <div className="flex items-center mt-1">
+          {[...Array(${field.maxRating || 5})].map((_, index) => (
+            <button
+              key={index}
+              type="button"
+              onClick={() => handleInputChange({ target: { name: '${field.id}', value: index + 1 } })}
+              className={\`text-2xl \${index < (formData['${field.id}'] || 0) ? 'text-yellow-400' : 'text-gray-300'}\`}
+            >
+              ★
+            </button>
+          ))}
+        </div>
+      `
+    case FieldType.Integer:
+      return `<input type="number" id="${field.id}" name="${field.id}" onChange={handleInputChange} required={${field.required}} min={${field.min}} max={${field.max}} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />`
+    case FieldType.Date:
+      return `
+        <input
+          type="date"
+          id="${field.id}"
+          name="${field.id}"
+          onChange={handleInputChange}
+          required={${field.required}}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+        />
+      `
     default:
       return ''
   }
@@ -302,6 +332,21 @@ function renderHtmlField(field: FormField): string {
           ${field.options?.map(option => `<option value="${option}">${option}</option>`).join('\n')}
         </select>
       `
+    case FieldType.File:
+      return `<input type="file" id="${field.id}" name="${field.id}" ${field.required ? 'required' : ''} />`
+    case FieldType.Rating:
+      return `
+        <div class="rating">
+          ${[...Array(field.maxRating || 5)].map((_, index) => `
+            <input type="radio" id="${field.id}-${index + 1}" name="${field.id}" value="${index + 1}" ${field.required ? 'required' : ''} />
+            <label for="${field.id}-${index + 1}">★</label>
+          `).join('\n')}
+        </div>
+      `
+    case FieldType.Integer:
+      return `<input type="number" id="${field.id}" name="${field.id}" min="${field.min}" max="${field.max}" ${field.required ? 'required' : ''} />`
+    case FieldType.Date:
+      return `<input type="date" id="${field.id}" name="${field.id}" ${field.required ? 'required' : ''} />`
     default:
       return ''
   }
@@ -323,3 +368,4 @@ function getOperatorString(operator: string): string {
       return '==='
   }
 }
+

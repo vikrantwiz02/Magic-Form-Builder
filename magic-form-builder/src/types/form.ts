@@ -4,6 +4,10 @@ export enum FieldType {
   Checkbox = 'Checkbox',
   Radio = 'Radio',
   Select = 'Select',
+  File = 'File',
+  Rating = 'Rating',
+  Integer = 'Integer',
+  Date = 'Date'
 }
 
 export interface FormField {
@@ -12,6 +16,9 @@ export interface FormField {
   label: string;
   required: boolean;
   options?: string[];
+  min?: number;
+  max?: number;
+  maxRating?: number;
 }
 
 export enum ConditionOperator {

@@ -126,6 +126,53 @@ function renderField(field: FormField, value: any, onChange: (value: any) => voi
           </SelectContent>
         </Select>
       )
+    case FieldType.File:
+      return (
+        <Input
+          id={field.id}
+          type="file"
+          onChange={(e) => onChange(e.target.files?.[0])}
+          required={field.required}
+        />
+      )
+    case FieldType.Rating:
+      return (
+        <div className="flex items-center space-x-1">
+          {[...Array(field.maxRating || 5)].map((_, index) => (
+            <Button
+              key={index}
+              type="button"
+              variant={index < (value || 0) ? "default" : "outline"}
+              size="sm"
+              onClick={() => onChange(index + 1)}
+            >
+              {index + 1}
+            </Button>
+          ))}
+        </div>
+      )
+    case FieldType.Integer:
+      return (
+        <Input
+          id={field.id}
+          type="number"
+          value={value || ''}
+          onChange={(e) => onChange(parseInt(e.target.value))}
+          required={field.required}
+          min={field.min}
+          max={field.max}
+        />
+      )
+    case FieldType.Date:
+      return (
+        <Input
+          id={field.id}
+          type="date"
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value)}
+          required={field.required}
+        />
+      )
     default:
       return null
   }
